@@ -666,7 +666,7 @@ where
 		let dest = Destination::get();
 
 		let (ticket, price) = validate_send::<Sender>(dest, xcm).map_err(|e| {
-			log::error!(target: LOG_TARGET, "Failed to validate XCM: {:?}", e);
+			log::error!(target: LOG_TARGET, "Failed to validate XCM: {e:?}");
 			SendKeysError::Send(SendOperationError::ValidationFailed)
 		})?;
 
@@ -709,12 +709,12 @@ where
 		});
 
 		XcmExec::charge_fees(payer_location, total_assets).map_err(|e| {
-			log::error!(target: LOG_TARGET, "Failed to charge fees: {:?}", e);
+			log::error!(target: LOG_TARGET, "Failed to charge fees: {e:?}");
 			SendKeysError::Send(SendOperationError::ChargeFeesFailed)
 		})?;
 
 		Sender::deliver(ticket).map_err(|e| {
-			log::error!(target: LOG_TARGET, "Failed to deliver XCM: {:?}", e);
+			log::error!(target: LOG_TARGET, "Failed to deliver XCM: {e:?}");
 			SendKeysError::Send(SendOperationError::DeliveryFailed)
 		})?;
 
