@@ -74,7 +74,7 @@ jobs:
           echo "STABLE_BRANCH=$STABLE_BRANCH" >> $GITHUB_OUTPUT
 
           # I am calling it like this because we will call post crates workflow after on this one
-          echo "RELEASE_BRANCH=post-crates-release-$RELEASE_NAME" >> $GITHUB_OUTPUT
+          echo "CRATES_RELEASE_BRANCH=post-crates-release-$RELEASE_NAME" >> $GITHUB_OUTPUT
 
       - name: Checkout stable branch
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -102,11 +102,11 @@ jobs:
 
       - name: Create release branch
         run: |
-          RELEASE_BRANCH="${{ steps.derive_branch.outputs.RELEASE_BRANCH }}"
-          echo "Creating branch: $RELEASE_BRANCH"
+          CRATES_RELEASE_BRANCH="${{ steps.derive_branch.outputs.CRATES_RELEASE_BRANCH }}"
+          echo "Creating branch: $CRATES_RELEASE_BRANCH"
 
-          git checkout -b "$RELEASE_BRANCH"
-          echo "Successfully created branch $RELEASE_BRANCH"
+          git checkout -b "$CRATES_RELEASE_BRANCH"
+          echo "Successfully created branch $CRATES_RELEASE_BRANCH"
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
@@ -185,10 +185,10 @@ jobs:
 
       - name: Push release branch
         run: |
-          RELEASE_BRANCH="${{ steps.derive_branch.outputs.RELEASE_BRANCH }}"
-          echo "Pushing branch $RELEASE_BRANCH..."
-          git push origin "$RELEASE_BRANCH"
-          echo "Successfully pushed $RELEASE_BRANCH"
+          CRATES_RELEASE_BRANCH="${{ steps.derive_branch.outputs.CRATES_RELEASE_BRANCH }}"
+          echo "Pushing branch $CRATES_RELEASE_BRANCH..."
+          git push origin "$CRATES_RELEASE_BRANCH"
+          echo "Successfully pushed $CRATES_RELEASE_BRANCH"
 
       - name: Configure cargo registry
         run: |
@@ -218,12 +218,9 @@ jobs:
           if [ "$DRY_RUN" = "true" ]; then
             echo "DRY RUN - Not actually publishing crates"
             echo "Target registry: $REGISTRY"
-            echo "Would run: parity-publish apply -p --batch-delay 15 --max-concurrent 1 --batch-size 1"
-            echo ""
-            echo "Crates that would be published:"
-            parity-publish apply --print || true
+            parity-publish apply -p -d
           else
             echo "Publishing crates to $REGISTRY..."
-            parity-publish apply -p --batch-delay 15 --max-concurrent 1 --batch-size 1
+            parity-publish apply -p
             echo "Crates published successfully to $REGISTRY!"
           fi
